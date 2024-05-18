@@ -1,8 +1,12 @@
 import 'dart:io';
 
+// import 'package:android_path_provider/android_path_provider.dart';
 import 'package:download_assets/download_assets.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
+// import 'package:flutter_downloader/flutter_downloader.dart';
+//
+// import 'package:permission_handler/permission_handler.dart';
+// import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -80,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       image: FileImage(File(
-                          '${downloadAssetsController.assetsDir}/app_bar_of_units.png')),
+                          '${downloadAssetsController.assetsDir}/assessment_part.png')),
                       fit: BoxFit.fitWidth,
                     ),
                   ),
@@ -137,6 +141,17 @@ class _MyHomePageState extends State<MyHomePage> {
       );
 
   Future _downloadAssets() async {
+    final assetsDownloaded =
+        await downloadAssetsController.assetsFileExists('math');
+    print('assetsDownloaded:$assetsDownloaded');
+    if (assetsDownloaded) {
+      setState(() {
+        message = 'Click in refresh button to force download';
+        print(message);
+      });
+      return;
+    }
+
     try {
       value = 0.0;
       downloaded = false;
@@ -148,8 +163,8 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {});
           },
           assetsUrls: [
-            'https://ambernoak.co.uk/Fillament/public/storage/math/assessment_part.png',
-            'https://ambernoak.co.uk/Fillament/public/storage/math/app_bar_of_units.png'
+            // 'https://github.com/edjostenes/download_assets/raw/main/download/assets.zip',
+            'https://ambernoak.co.uk/Fillament/public/storage/math.rar'
           ],
           onProgress: (progressValue) {
             value = progressValue;
@@ -173,9 +188,103 @@ class _MyHomePageState extends State<MyHomePage> {
         message = 'Error: ${e.toString()}';
       });
     }
-
     print('${downloadAssetsController.assetsDir}');
+    print('${downloadAssetsController.assetsDir?.length}');
+    String rar5_path = '${downloadAssetsController.assetsDir}/math.rar';
+    // print(
+    //     "${await CounterStorage().listFilesAndFolders(downloadAssetsController.assetsDir ?? '')}");
+    //
+    // final directory = downloadAssetsController.assetsDir;
+    // final rarFilePath = '${directory}/math.rar';
+    // final destinationDirPath = '${directory}';
+    // await CounterStorageZip().requestDownload(
+    //     'https://ambernoak.co.uk/Fillament/public/storage/math.rar');
+    // }
   }
 
   void _cancel() => downloadAssetsController.cancelDownload();
 }
+
+// class CounterStorage {
+//   Future<List<String>> listFilesAndFolders(String path) async {
+//     final directory = Directory(path);
+//     if (await directory.exists()) {
+//       final filesAndFolders = directory.listSync();
+//       return filesAndFolders.map((e) => e.path).toList();
+//     } else {
+//       return [];
+//     }
+//   }
+// }
+//
+// class CounterStorageZip {
+//   String? _localPath;
+//
+//   Future<String?> _getSavedDir() async {
+//     String? externalStorageDirPath;
+//
+//     if (Platform.isAndroid) {
+//       try {
+//         externalStorageDirPath = await AndroidPathProvider.downloadsPath;
+//       } catch (err, st) {
+//         print('failed to get downloads path: $err, $st');
+//
+//         final directory = await getExternalStorageDirectory();
+//         externalStorageDirPath = directory?.path;
+//       }
+//     } else if (Platform.isIOS) {
+//       // var dir = (await _dirsOnIOS)[0]; // temporary
+//       // var dir = (await _dirsOnIOS)[1]; // applicationSupport
+//       // var dir = (await _dirsOnIOS)[2]; // library
+//       var dir = (await _dirsOnIOS)[3]; // applicationDocuments
+//       // var dir = (await _dirsOnIOS)[4]; // downloads
+//
+//       dir ??= await getApplicationDocumentsDirectory();
+//       externalStorageDirPath = dir.absolute.path;
+//     }
+//
+//     return externalStorageDirPath;
+//   }
+//
+//   Future<List<Directory?>> get _dirsOnIOS async {
+//     final temporary = await getTemporaryDirectory();
+//     final applicationSupport = await getApplicationSupportDirectory();
+//     final library = await getLibraryDirectory();
+//     final applicationDocuments = await getApplicationDocumentsDirectory();
+//     final downloads = await getDownloadsDirectory();
+//
+//     final dirs = [
+//       temporary,
+//       applicationSupport,
+//       library,
+//       applicationDocuments,
+//       downloads
+//     ];
+//
+//     return dirs;
+//   }
+//
+//   Future<void> _prepareSaveDir() async {
+//     _localPath = (await _getSavedDir())!;
+//     final savedDir = Directory(_localPath!);
+//     if (!savedDir.existsSync()) {
+//       await savedDir.create();
+//     }
+//   }
+//
+//   Future<void> requestDownload(String url) async {
+//     try {
+//       await _prepareSaveDir();
+//       await Permission.storage.request();
+//       print('_localPath:$_localPath');
+//       final taskId = await FlutterDownloader.enqueue(
+//         url: url,
+//         savedDir: _localPath!,
+//         saveInPublicStorage: false,
+//       );
+//     } catch (e, s) {
+//       print(e);
+//       print(s);
+//     }
+//   }
+// }
