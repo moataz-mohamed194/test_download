@@ -1,7 +1,15 @@
 import 'dart:io';
 
+import 'package:archive/archive.dart';
 import 'package:download_assets/download_assets.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:path/path.dart';
+
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:process_run/process_run.dart';
+import 'package:unrar_file/unrar_file.dart';
 import 'package:path_provider/path_provider.dart';
 
 void main() {
@@ -80,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       image: FileImage(File(
-                          '${downloadAssetsController.assetsDir}/assessment_part.png')),
+                          '${downloadAssetsController.assetsDir}/app_bar_of_units.png')),
                       fit: BoxFit.fitWidth,
                     ),
                   ),
@@ -137,17 +145,6 @@ class _MyHomePageState extends State<MyHomePage> {
       );
 
   Future _downloadAssets() async {
-    // final assetsDownloaded =
-    //     await downloadAssetsController.assetsFileExists('math');
-    // print('assetsDownloaded:$assetsDownloaded');
-    // if (assetsDownloaded) {
-    //   setState(() {
-    //     message = 'Click in refresh button to force download';
-    //     print(message);
-    //   });
-    //   return;
-    // }
-
     try {
       value = 0.0;
       downloaded = false;
@@ -159,7 +156,8 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {});
           },
           assetsUrls: [
-            'https://github.com/edjostenes/download_assets/raw/main/download/assets.zip',
+            'https://ambernoak.co.uk/Fillament/public/storage/math/assessment_part.png',
+            'https://ambernoak.co.uk/Fillament/public/storage/math/app_bar_of_units.png'
           ],
           onProgress: (progressValue) {
             value = progressValue;
@@ -183,50 +181,9 @@ class _MyHomePageState extends State<MyHomePage> {
         message = 'Error: ${e.toString()}';
       });
     }
+
     print('${downloadAssetsController.assetsDir}');
-    print('${downloadAssetsController.assetsDir?.length}');
-    print("${await CounterStorage()._localPath}");
-    print(
-        "${await CounterStorage().listFilesAndFolders(downloadAssetsController.assetsDir ?? '')}");
   }
 
   void _cancel() => downloadAssetsController.cancelDownload();
-}
-
-class CounterStorage {
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-
-    return directory.path;
-  }
-
-  Future<File> get _localFile async {
-    final path = await _localPath;
-    return File('$path/math/');
-  }
-
-  Future<List<String>> listFilesAndFolders(String path) async {
-    final directory = Directory(path);
-    if (await directory.exists()) {
-      final filesAndFolders = directory.listSync();
-      return filesAndFolders.map((e) => e.path).toList();
-    } else {
-      return [];
-    }
-  }
-
-  Future<int> readCounter() async {
-    try {
-      final file = await _localFile;
-      print('$file');
-      // Read the file
-      print(await file.length());
-      final contents = await file.readAsString();
-
-      return int.parse(contents);
-    } catch (e) {
-      // If encountering an error, return 0
-      return 0;
-    }
-  }
 }
